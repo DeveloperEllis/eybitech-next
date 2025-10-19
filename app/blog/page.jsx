@@ -14,7 +14,7 @@ export const metadata = {
     description: "Descubre noticias, artículos y guías paso a paso sobre tecnología. Reviews y tutoriales de productos tecnológicos.",
     images: [
       {
-        url: '/logo.png',
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
         width: 1200,
         height: 630,
         alt: 'Blog Eybitech - Tutoriales de tecnología',
@@ -25,7 +25,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Blog & Tutoriales | Eybitech",
     description: "Noticias, artículos y guías paso a paso sobre tecnología.",
-    images: ['/logo.png'],
+    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`],
   },
 };
 

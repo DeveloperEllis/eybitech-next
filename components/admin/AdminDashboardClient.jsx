@@ -8,6 +8,7 @@ import ServicesManagement from './ServicesManagement';
 import CurrencyManagement from './CurrencyManagement';
 import ProductAnalytics from './ProductAnalytics';
 import BlogManagement from './BlogManagement';
+import AdsManagement from './AdsManagement';
 
 import { supabase } from '../../lib/supabase/browserClient';
 import StoreSettings from './StoreSettings';
@@ -48,7 +49,9 @@ export default function AdminDashboardClient() {
     { id: 'currency', name: 'Tasas de Cambio', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     )},
-
+    { id: 'ads', name: 'Anuncios', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m0 4v10m4-10v10M5 7v10m14-6h2m-2 4h2m-2-8h2"/></svg>
+    )},
     { id: 'settings', name: 'Ajustes de Tienda', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-1.14 1.953-1.14 2.253 0a1.724 1.724 0 002.573 1.066c1.003-.58 2.187.604 1.607 1.607a1.724 1.724 0 001.066 2.573c1.14.3 1.14 1.953 0 2.253a1.724 1.724 0 00-1.066 2.573c.58 1.003-.604 2.187-1.607 1.607a1.724 1.724 0 00-2.573 1.066c-.3 1.14-1.953 1.14-2.253 0a1.724 1.724 0 00-2.573-1.066c-1.003.58-2.187-.604-1.607-1.607a1.724 1.724 0 00-1.066-2.573c-1.14-.3-1.14-1.953 0-2.253a1.724 1.724 0 001.066-2.573c-.58-1.003.604-2.187 1.607-1.607.99.572 2.232.05 2.573-1.066z"/></svg>
     )},
@@ -58,41 +61,31 @@ export default function AdminDashboardClient() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-gray-200">
-        <div className="flex items-center justify-center h-16 border-b border-gray-200 bg-blue-600">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+        <div className="flex items-center justify-center h-16 border-b border-gray-200 ">
+          <div className="flex items-center space-x-2 ">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center ">
               <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>
             </div>
-            <span className="text-white font-bold text-lg">EYBITECH</span>
+            <span className="text-blue-600 font-bold text-lg ">EYBITECH</span>
           </div>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 px-4 py-6 ">
           {menuItems.map((item) => (
             <button key={item.id} onClick={() => setActiveSection(item.id)} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${activeSection === item.id ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}>
               {item.icon}
               <span>{item.name}</span>
             </button>
-          ))}
+          ))},
+           <div className="pt-4 mt-2 border-t border-gray-200">
+                  <button
+                    onClick={async () => { await supabase.auth.signOut(); setSidebarOpen(false); router.replace('/admin/login'); }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 font-medium"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" /></svg>
+                    <span>Salir</span>
+                  </button>
+                </div>
         </nav>
-        <div className="mt-auto border-t border-gray-200 p-4 space-y-3">
-          <div className="flex items-center space-x-3 mb-3 px-3 py-2 bg-gray-50 rounded-lg">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">{user?.email?.charAt(0).toUpperCase()}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{user?.email}</p>
-              <p className="text-xs text-gray-500">Administrador</p>
-            </div>
-          </div>
-          <button onClick={() => router.push('/')} className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            <span>Ver sitio</span>
-          </button>
-          <button onClick={async () => { await supabase.auth.signOut(); router.replace('/admin/login'); }} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 font-medium">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" /></svg>
-            <span>Salir</span>
-          </button>
-        </div>
       </aside>
 
       {/* Main Content */}
@@ -113,10 +106,6 @@ export default function AdminDashboardClient() {
               <span className="font-semibold">{menuItems.find(i => i.id === activeSection)?.name}</span>
             </div>
           </div>
-          <button onClick={() => router.push('/')} className="text-sm inline-flex items-center space-x-1 hover:text-gray-100 transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-            <span>Ver sitio</span>
-          </button>
         </header>
 
         {/* Mobile Menu Overlay */}
@@ -127,20 +116,11 @@ export default function AdminDashboardClient() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-bold text-gray-900">Menú</span>
                   <button onClick={() => setSidebarOpen(false)} className="text-gray-600">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <svg className="w-6 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
-                <div className="flex items-center space-x-3 px-3 py-2 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{user?.email?.charAt(0).toUpperCase()}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{user?.email}</p>
-                    <p className="text-xs text-gray-500">Administrador</p>
-                  </div>
-                </div>
               </div>
-              <nav className="p-4 space-y-2">
+              <nav className="p-4 ">
                 {menuItems.map((item) => (
                   <button key={item.id} onClick={() => { setActiveSection(item.id); setSidebarOpen(false); }} className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${activeSection === item.id ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}>
                     {item.icon}
@@ -171,6 +151,7 @@ export default function AdminDashboardClient() {
           {activeSection === 'services' && <ServicesManagement />}
           {activeSection === 'blog' && <BlogManagement />}
           {activeSection === 'currency' && <CurrencyManagement />}
+          {activeSection === 'ads' && <AdsManagement />}
           {activeSection === 'settings' && <StoreSettings />}
         </main>
       </div>

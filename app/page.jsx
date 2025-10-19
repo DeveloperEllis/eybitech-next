@@ -2,44 +2,42 @@ import HomeClient from "../components/HomeClient";
 import { supabaseServer } from "../lib/supabase/serverClient";
 import { Suspense } from "react";
 
+
 export const revalidate = 60; // ISR básico para listado
 
 // Generar metadatos dinámicos para la página principal
-export async function generateMetadata() {
-  const supabase = supabaseServer();
-  
-  // Obtener algunos productos destacados para las imágenes
-  const { data: featuredProducts } = await supabase
-    .from("products")
-    .select("name, image_url, price, currency")
-    .eq("is_featured", true)
-    .limit(3);
-
-  // Usar siempre og-default.png para máxima compatibilidad en previews sociales
-  const images = [
-    {
-      url: '/og-default.png',
-      width: 1200,
-      height: 630,
-      alt: 'Eybitech - Tienda de tecnología en Cuba',
-    }
-  ];
-
+export function generateMetadata() {
   return {
-    title: 'Inicio',
-    description: 'Descubre los mejores productos tecnológicos en Cuba. Smartphones, laptops, tablets, smartwatches y accesorios de calidad en Eybitech.',
+    title: "Inicio",
+    description: "Descubre los mejores productos tecnológicos en Cuba. Smartphones, laptops, tablets, smartwatches y accesorios de calidad en Eybitech.",
+    keywords: ['tecnología', 'electrónicos', 'smartphones', 'laptops', 'Cuba', 'Trinidad', 'tienda online', 'ofertas'],
     openGraph: {
-      title: 'Eybitech - Los mejores productos tecnológicos en Cuba',
-      description: 'Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad. Precios competitivos y envíos a toda Cuba.',
-      type: 'website',
-      images: images,
+      title: "Eybitech - Los mejores productos tecnológicos en Cuba",
+      description: "Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad. Precios competitivos y envíos a toda Cuba.",
+      url: process.env.NEXT_PUBLIC_APP_URL,
+      siteName: "Eybitech",
+      type: "website",
+      locale: "es_CU",
+      images: [
+        {
+          url: `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
+          width: 1200,
+          height: 630,
+          alt: "Eybitech - Tienda de tecnología en Cuba",
+          type: "image/png",
+        },
+      ],
     },
     twitter: {
-      card: 'summary_large_image',
-      title: 'Eybitech - Los mejores productos tecnológicos en Cuba',
-      description: 'Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad.',
-      images: images.map(img => img.url),
+      card: "summary_large_image",
+      title: "Eybitech - Los mejores productos tecnológicos en Cuba",
+      description: "Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad.",
+      images: [`${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`],
+      creator: "@eybitech",
+      site: "@eybitech",
     },
+    // Proporcionar explícitamente og:image
+    "og:image": `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
   };
 }
 
@@ -66,6 +64,7 @@ export default async function HomePage() {
         ) : (
           <Suspense fallback={<div className="container-page py-6 text-gray-600">Cargando…</div>}>
             <HomeClient products={products || []} categories={categories || []} />
+            
           </Suspense>
         )}
       </main>

@@ -3,10 +3,14 @@ import SearchBar from './SearchBar';
 import ExchangeRateBanner from './ExchangeRateBanner';
 import ProductCard from './ProductCardNew';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { LoadingSpinner, InlineLoading, ProductGridSkeleton } from './LoadingComponents';
+// 🛠️ Asumiendo que AdAnnouncement está en su propio archivo (lo que es mejor práctica)
+import AdAnnouncement from './AdAnnouncement';
+import AdCarousel from '../app/ads/AdCarousel'; 
 
-// Componente para mostrar cuando no hay productos
+
+// Componente para mostrar cuando no hay productos (Sin cambios)
 function NoProductsFound({ searchTerm, category, flagFilter, onClearFilters }) {
   const getFilterDescription = () => {
     const filters = [];
@@ -61,6 +65,9 @@ function NoProductsFound({ searchTerm, category, flagFilter, onClearFilters }) {
   );
 }
 
+// ----------------------------------------------------------------------
+// Componente CategoryFilter (Sin cambios)
+// ----------------------------------------------------------------------
 function CategoryFilter({ categories }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -116,6 +123,55 @@ function CategoryFilter({ categories }) {
   );
 }
 
+// ----------------------------------------------------------------------
+// Componente FlagFilter (ÚNICA DEFINICIÓN)
+// ----------------------------------------------------------------------
+function FlagFilter({ setIsFiltering }) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+  const current = (searchParams.get('filter') || 'all').toLowerCase();
+
+  const update = async (value) => {
+    setIsFiltering(true);
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    if (!value || value === 'all') params.delete('filter');
+    else params.set('filter', value);
+    const qs = params.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname);
+    
+    // Simular delay para mostrar loading
+    setTimeout(() => setIsFiltering(false), 300);
+  };
+
+  const Chip = ({ value, label, icon }) => (
+    <button 
+      onClick={() => update(value)} 
+      className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap border transition-colors hover:scale-105 ${
+        current===value
+          ?'bg-purple-600 text-white border-purple-600 shadow-md'
+          :'bg-white text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-300'
+      }`}
+    >
+      {icon && <span className="mr-1">{icon}</span>}
+      {label}
+    </button>
+  );
+
+  return (
+    <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar py-1">
+      <Chip value="all" label="Todos" icon="🏪" />
+      <Chip value="new" label="Nuevo" icon="📦" />
+      <Chip value="sale" label="En oferta" icon="🔥" />
+      <Chip value="featured" label="Destacado" icon="⭐" />
+    </div>
+  );
+}
+
+
+// ----------------------------------------------------------------------
+// Componente Principal: HomeClient
+// ----------------------------------------------------------------------
 export default function HomeClient({ products, categories = [] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -158,6 +214,9 @@ export default function HomeClient({ products, categories = [] }) {
 
   return (
     <>
+      {/* 🟢 Componente de anuncio flotante */}
+      
+      
       <ExchangeRateBanner />
       <div className="container-page">
         <SearchBar />
@@ -213,47 +272,5 @@ export default function HomeClient({ products, categories = [] }) {
         )}
       </div>
     </>
-  );
-}
-
-function FlagFilter({ setIsFiltering }) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const router = useRouter();
-  const current = (searchParams.get('filter') || 'all').toLowerCase();
-
-  const update = async (value) => {
-    setIsFiltering(true);
-    const params = new URLSearchParams(Array.from(searchParams.entries()));
-    if (!value || value === 'all') params.delete('filter');
-    else params.set('filter', value);
-    const qs = params.toString();
-    router.push(qs ? `${pathname}?${qs}` : pathname);
-    
-    // Simular delay para mostrar loading
-    setTimeout(() => setIsFiltering(false), 300);
-  };
-
-  const Chip = ({ value, label, icon }) => (
-    <button 
-      onClick={() => update(value)} 
-      className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap border transition-colors hover:scale-105 ${
-        current===value
-          ?'bg-purple-600 text-white border-purple-600 shadow-md'
-          :'bg-white text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-300'
-      }`}
-    >
-      {icon && <span className="mr-1">{icon}</span>}
-      {label}
-    </button>
-  );
-
-  return (
-    <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar py-1">
-      <Chip value="all" label="Todos" icon="🏪" />
-      <Chip value="new" label="Nuevo" icon="📦" />
-      <Chip value="sale" label="En oferta" icon="🔥" />
-      <Chip value="featured" label="Destacado" icon="⭐" />
-    </div>
   );
 }

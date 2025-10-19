@@ -137,6 +137,7 @@ export default function CartPage() {
           </div>
         )}
       </main>
+      
     </div>
   );
 }

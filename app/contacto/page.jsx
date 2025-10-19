@@ -11,7 +11,7 @@ export const metadata = {
     description: "¿Tienes dudas o necesitas una cotización? Contáctanos por WhatsApp, email o formulario. Atención personalizada en Cuba.",
     images: [
       {
-        url: '/logo.png',
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
         width: 1200,
         height: 630,
         alt: 'Contacto Eybitech - Atención personalizada',
@@ -22,7 +22,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Contacto | Eybitech",
     description: "Contáctanos por WhatsApp, email o formulario. Atención personalizada en Cuba.",
-    images: ['/logo.png'],
+    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`],
   },
 };
 
