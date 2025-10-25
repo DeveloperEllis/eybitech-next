@@ -2,6 +2,7 @@ import Navbar from "../../components/Navbar";
 import FooterBar from "../../components/FooterBar";
 import { supabaseServer } from "../../lib/supabase/serverClient";
 import ServicesClient from "../../components/ServicesClient";
+import { og_images } from "../../constants/appConstants";
 
 export const revalidate = 600; // Revalidar cada 10 minutos
 
@@ -11,11 +12,12 @@ export const metadata = {
   keywords: ['servicios', 'reparación', 'mantenimiento', 'soporte técnico', 'tecnología', 'Cuba', 'Eybitech'],
   openGraph: {
     type: "website",
+    url: `${process.env.NEXT_PUBLIC_APP_URL}/servicios`,
     title: "Servicios Profesionales | Eybitech",
     description: "Reparación, mantenimiento, instalación y soporte técnico de equipos tecnológicos en Cuba.",
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
+        url: og_images.default,
         width: 1200,
         height: 630,
         alt: 'Servicios Eybitech - Soporte técnico profesional',
@@ -26,8 +28,9 @@ export const metadata = {
     card: "summary_large_image",
     title: "Servicios Profesionales | Eybitech",
     description: "Reparación, mantenimiento, instalación y soporte técnico de equipos tecnológicos.",
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`],
+    images: [og_images.default],
   },
+  "og:image": og_images.default,
 };
 
 export default async function ServiciosPage() {

@@ -45,13 +45,11 @@ export default function ProductInfoClient({ product }) {
                   `💲 Ahora: ${currentPrice} ${product.currency}\n` +
                   `🎉 ¡Ahorras ${savings.toFixed(2)} ${product.currency}!\n\n` +
                   `¡No te lo pierdas! Ver más detalles:\n${productUrl}`;
-    } else {
-      shareText = `¡Mira este producto en ${storeName}! 🛒\n\n📱 *${product.name}*\n💰 ${product.price} ${product.currency}\n\n${productUrl}`;
+   } else {
+      shareText = `¡Mira este producto en ${BUSINESS_INFO.NAME}! 🛒\n\n📱 *${product.name}*\n💰 ${product.price} ${product.currency}\n\n${productUrl}`;
     }
     
-    // Abrir WhatsApp con número de settings si existe
-    const num = (whats || CONTACT_INFO.WHATSAPP_NUMBER || '').replace(/[^\d]/g, '');
-    const whatsappUrl = `https://wa.me/${num}?text=${encodeURIComponent(shareText)}`;
+    const whatsappUrl = SOCIAL_SHARE_URLS.WHATSAPP(shareText);
     window.open(whatsappUrl, '_blank');
     setShowShareMenu(false);
   };

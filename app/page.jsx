@@ -1,6 +1,7 @@
 import HomeClient from "../components/HomeClient";
 import { supabaseServer } from "../lib/supabase/serverClient";
 import { Suspense } from "react";
+import { og_images } from "../constants/appConstants";
 
 
 export const revalidate = 60; // ISR básico para listado
@@ -20,7 +21,7 @@ export function generateMetadata() {
       locale: "es_CU",
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
+          url: og_images.default,
           width: 1200,
           height: 630,
           alt: "Eybitech - Tienda de tecnología en Cuba",
@@ -32,12 +33,12 @@ export function generateMetadata() {
       card: "summary_large_image",
       title: "Eybitech - Los mejores productos tecnológicos en Cuba",
       description: "Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad.",
-      images: [`${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`],
+      images: og_images.default,
       creator: "@eybitech",
       site: "@eybitech",
     },
     // Proporcionar explícitamente og:image
-    "og:image": `${process.env.NEXT_PUBLIC_APP_URL}/og-default.png`,
+    "og:image": og_images.default,
   };
 }
 
@@ -46,8 +47,7 @@ export default async function HomePage() {
   const supabase = supabaseServer();
   const { data: products, error } = await supabase
     .from("products")
-    .select("id, name, description, price, currency, image_url, discount_percentage, original_price, stock, category_id, is_on_sale, is_new_in_box, is_featured")
-    .limit(12);
+    .select("id, name, description, price, currency, image_url, discount_percentage, original_price, stock, category_id, is_on_sale, is_new_in_box, is_featured");
 
   const { data: categories = [] } = await supabase
     .from("categories")

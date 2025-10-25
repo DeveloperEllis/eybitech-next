@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 // Importa la función de inicialización del servidor
 import { createServerClient } from '../../../lib/supabase/supabaseServer.js'; 
-
+export const dynamic = 'force-dynamic'; 
 /**
  * Maneja las solicitudes HTTP GET, consultando la tabla public.ads de Supabase.
  */

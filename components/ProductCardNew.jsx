@@ -168,7 +168,7 @@ export default function ProductCard({ product, onAddToCart }) {
                 <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center">
                   <span className="text-gray-600 text-xl">🔗</span>
                 </div>
-                <div className="flex-1 min-w-0">s
+                <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 text-base">Copiar enlace</p>
                   <p className="text-sm text-gray-500 truncate">Copiar al portapapeles</p>
                 </div>

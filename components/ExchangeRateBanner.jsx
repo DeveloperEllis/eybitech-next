@@ -30,9 +30,12 @@ export default function ExchangeRateBanner() {
     );
   }
 
-  const usdToCup = rates.USD_TO_CUP?.toFixed(2) || '120.00';
-  const eurToCup = rates.EUR_TO_CUP?.toFixed(2) || '130.00';
-  const usdToEur = rates.USD_TO_EUR?.toFixed(4) || '0.9200';
+  // Calcular las tasas de conversión desde el nuevo formato
+  // rates ahora es: { USD: 250, EUR: 270.5, CUP: 1, ... }
+  const usdToCup = rates.USD?.toFixed(2) || '475.00';
+  const eurToCup = rates.EUR?.toFixed(2) || '530.50';
+  // USD a EUR = (USD/CUP) / (EUR/CUP) = USD / EUR
+  const usdToEur = rates.USD && rates.EUR ? (rates.USD / rates.EUR).toFixed(4) : '0.9250';
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 text-white py-3.5 overflow-hidden relative shadow-md">

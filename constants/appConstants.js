@@ -31,6 +31,14 @@ function createValidURL(url) {
 }
 
 const APP_URL = createValidURL(process.env.NEXT_PUBLIC_APP_URL);
+
+export const og_images = {
+  default: `https://rboebzykpwhnyjdrygss.supabase.co/storage/v1/object/public/image-web/images/og-default.png`,
+  calculadora: `https://rboebzykpwhnyjdrygss.supabase.co/storage/v1/object/public/image-web/images/og-calculadora.png`,
+  tutoriales:  `https://rboebzykpwhnyjdrygss.supabase.co/storage/v1/object/public/image-web/images/og-default.png`,
+
+}
+
 export const URLS = {
   WEBSITE: APP_URL.replace(/\/$/, ''),
   FACEBOOK_PAGE: 'https://facebook.com/eybitech',
