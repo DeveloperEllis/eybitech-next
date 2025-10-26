@@ -416,9 +416,13 @@ function ProductsManagement() {
         
         // Revalidar el caché de la página principal
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (process.env.NEXT_PUBLIC_REVALIDATE_TOKEN) {
+            headers['x-revalidate-token'] = process.env.NEXT_PUBLIC_REVALIDATE_TOKEN;
+          }
           const revalidateRes = await fetch('/api/revalidate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ path: '/' })
           });
           const revalidateData = await revalidateRes.json();
@@ -465,9 +469,13 @@ function ProductsManagement() {
         
         // Revalidar el caché de la página principal
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (process.env.NEXT_PUBLIC_REVALIDATE_TOKEN) {
+            headers['x-revalidate-token'] = process.env.NEXT_PUBLIC_REVALIDATE_TOKEN;
+          }
           const revalidateRes = await fetch('/api/revalidate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ path: '/' })
           });
           const revalidateData = await revalidateRes.json();
@@ -523,9 +531,13 @@ function ProductsManagement() {
       }
       // Revalidar el caché de la página principal
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (process.env.NEXT_PUBLIC_REVALIDATE_TOKEN) {
+            headers['x-revalidate-token'] = process.env.NEXT_PUBLIC_REVALIDATE_TOKEN;
+          }
           const revalidateRes = await fetch('/api/revalidate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({ path: '/' })
           });
           const revalidateData = await revalidateRes.json();
