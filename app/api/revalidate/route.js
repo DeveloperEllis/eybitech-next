@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { createServerClient } from '../../../lib/supabase/supabaseServer';
 
 // Optionally protect this endpoint by setting REVALIDATE_SECRET in your environment.
 // If set, the client must send header 'x-revalidate-token' with the same value.
@@ -9,14 +10,35 @@ export async function POST(request) {
   try {
     console.log('[REVALIDATE] Request received');
     
-    // Secret protection (optional)
+    // Opción 1: Validar con REVALIDATE_SECRET (para llamadas de cron jobs, webhooks externos, etc.)
     const secret = process.env.REVALIDATE_SECRET;
-    if (secret) {
-      const token = request.headers.get('x-revalidate-token');
-      if (!token || token !== secret) {
-        console.log('[REVALIDATE] Unauthorized');
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const token = request.headers.get('x-revalidate-token');
+    
+    // Opción 2: Validar sesión de usuario autenticado (para llamadas desde el admin UI)
+    let isAuthorized = false;
+    
+    // Si viene con token secreto, autorizar
+    if (secret && token === secret) {
+      isAuthorized = true;
+      console.log('[REVALIDATE] Authorized via secret token');
+    } else {
+      // Si no, validar que sea un usuario autenticado con sesión de Supabase
+      try {
+        const supabase = createServerClient();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          isAuthorized = true;
+          console.log('[REVALIDATE] Authorized via user session:', session.user.email);
+        }
+      } catch (authError) {
+        console.log('[REVALIDATE] Auth check failed:', authError);
       }
+    }
+    
+    if (!isAuthorized) {
+      console.log('[REVALIDATE] Unauthorized - no valid token or session');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
