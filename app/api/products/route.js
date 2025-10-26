@@ -50,3 +50,35 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// Soporte para POST: forzar refresco de caché (útil desde el admin tras editar/crear/eliminar)
+export async function POST(request) {
+  try {
+    console.log('[PRODUCTS API] POST refresh requested');
+    
+    // Clear local cache and fetch fresh data from Supabase
+    productsCache = null;
+    cacheTimestamp = null;
+
+    const supabase = createServerClient();
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('id, name, price, currency, image_url, discount_percentage, original_price, stock, category_id, is_on_sale, is_new_in_box, is_featured')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('[PRODUCTS API] Error refreshing cache:', error);
+      return NextResponse.json({ revalidated: false, error: 'Error fetching products' }, { status: 500 });
+    }
+
+    productsCache = products || [];
+    cacheTimestamp = Date.now();
+    
+    console.log(`[PRODUCTS API] Cache refreshed successfully. Count: ${productsCache.length}`);
+
+    return NextResponse.json({ revalidated: true, count: productsCache.length });
+  } catch (err) {
+    console.error('[PRODUCTS API] Error in POST refresh:', err);
+    return NextResponse.json({ revalidated: false, error: 'Internal server error' }, { status: 500 });
+  }
+}

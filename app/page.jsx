@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { og_images } from "../constants/appConstants";
 
 
-export const revalidate = 300; // ISR: Revalidar cada 5 minutos
+export const revalidate = 60; // ISR: Revalidar cada 1 minuto (más agresivo para testing)
 
 // Generar metadatos dinámicos para la página principal
 export function generateMetadata() {

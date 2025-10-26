@@ -414,6 +414,27 @@ function ProductsManagement() {
           .eq('id', editingProduct.id);
         if (error) throw error;
         
+        // Revalidar el caché de la página principal
+        try {
+          const revalidateRes = await fetch('/api/revalidate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/' })
+          });
+          const revalidateData = await revalidateRes.json();
+          console.log('✅ Revalidate response:', revalidateData);
+        } catch (revalError) {
+          console.warn('❌ No se pudo revalidar el caché:', revalError);
+        }
+        // Additionally request the products API to refresh its in-memory cache (if used)
+        try {
+          const productsRes = await fetch('/api/products', { method: 'POST' });
+          const productsData = await productsRes.json();
+          console.log('✅ Products cache refresh response:', productsData);
+        } catch (prodRefreshErr) {
+          console.warn('❌ No se pudo refrescar el cache de /api/products:', prodRefreshErr);
+        }
+        
         alert('✅ Producto actualizado correctamente');
       } else {
         // Crear nuevo producto
@@ -440,6 +461,27 @@ function ProductsManagement() {
             .from('product_images')
             .insert(imageRecords);
           if (imgError) console.error('Error insertando imágenes:', imgError);
+        }
+        
+        // Revalidar el caché de la página principal
+        try {
+          const revalidateRes = await fetch('/api/revalidate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/' })
+          });
+          const revalidateData = await revalidateRes.json();
+          console.log('✅ Revalidate response (create):', revalidateData);
+        } catch (revalError) {
+          console.warn('❌ No se pudo revalidar el caché:', revalError);
+        }
+        // Additionally request the products API to refresh its in-memory cache (if used)
+        try {
+          const productsRes = await fetch('/api/products', { method: 'POST' });
+          const productsData = await productsRes.json();
+          console.log('✅ Products cache refresh response (create):', productsData);
+        } catch (prodRefreshErr) {
+          console.warn('❌ No se pudo refrescar el cache de /api/products:', prodRefreshErr);
         }
         
         alert('✅ Producto creado correctamente');
@@ -479,6 +521,28 @@ function ProductsManagement() {
           }
         }
       }
+      // Revalidar el caché de la página principal
+        try {
+          const revalidateRes = await fetch('/api/revalidate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/' })
+          });
+          const revalidateData = await revalidateRes.json();
+          console.log('✅ Revalidate response (delete):', revalidateData);
+        } catch (revalError) {
+          console.warn('❌ No se pudo revalidar el caché:', revalError);
+        }
+        // Additionally request the products API to refresh its in-memory cache (if used)
+        try {
+          const productsRes = await fetch('/api/products', { method: 'POST' });
+          const productsData = await productsRes.json();
+          console.log('✅ Products cache refresh response (delete):', productsData);
+        } catch (prodRefreshErr) {
+          console.warn('❌ No se pudo refrescar el cache de /api/products:', prodRefreshErr);
+        }
+        
+      
       alert('✅ Producto eliminado correctamente');
       fetchProducts();
     } catch (error) {
