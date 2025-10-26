@@ -3,7 +3,7 @@ import SearchBar from './SearchBar';
 import ExchangeRateBanner from './ExchangeRateBanner';
 import ProductCard from './ProductCardNew';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect, useRef, useCallback } from 'react';
 import { LoadingSpinner, InlineLoading, ProductGridSkeleton } from './LoadingComponents';
 // 🛠️ Asumiendo que AdAnnouncement está en su propio archivo (lo que es mejor práctica)
 import AdAnnouncement from './AdAnnouncement';
@@ -172,20 +172,85 @@ function FlagFilter({ setIsFiltering }) {
 // ----------------------------------------------------------------------
 // Componente Principal: HomeClient
 // ----------------------------------------------------------------------
-export default function HomeClient({ products, categories = [] }) {
+export default function HomeClient({ products: initialProducts, categories = [] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [isFiltering, setIsFiltering] = useState(false);
   
+  // Estado para scroll infinito
+  const [allProducts, setAllProducts] = useState(initialProducts);
+  const [displayedProducts, setDisplayedProducts] = useState(initialProducts);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const observerTarget = useRef(null);
+  
   const searchTerm = (searchParams.get('search') || '').toLowerCase();
   const category = searchParams.get('category') || 'all';
   const flagFilter = (searchParams.get('filter') || 'all').toLowerCase();
 
-  // Filtrado de productos
+  // Cargar más productos desde la API
+  const loadMoreProducts = useCallback(async () => {
+    if (isLoadingMore || !hasMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await fetch(`/api/products?page=${nextPage}&limit=20`);
+      const data = await response.json();
+      
+      if (data.products && data.products.length > 0) {
+        setAllProducts(prev => [...prev, ...data.products]);
+        setDisplayedProducts(prev => [...prev, ...data.products]);
+        setPage(nextPage);
+        setHasMore(nextPage < data.totalPages);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error loading more products:', error);
+      setHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [page, hasMore, isLoadingMore]);
+
+  // Intersection Observer para detectar scroll al final
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMoreProducts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, isLoadingMore, loadMoreProducts]);
+
+  // Resetear cuando cambian los productos iniciales
+  useEffect(() => {
+    setAllProducts(initialProducts);
+    setDisplayedProducts(initialProducts);
+    setPage(1);
+    setHasMore(initialProducts.length >= 20);
+  }, [initialProducts]);
+
+  // Filtrado de productos (ahora usa displayedProducts)
   const textFiltered = !searchTerm
-    ? products
-    : products.filter(p =>
+    ? displayedProducts
+    : displayedProducts.filter(p =>
         p.name?.toLowerCase().includes(searchTerm) ||
         p.description?.toLowerCase().includes(searchTerm)
       );
@@ -210,7 +275,7 @@ export default function HomeClient({ products, categories = [] }) {
   const hasActiveFilters = searchTerm || category !== 'all' || flagFilter !== 'all';
 
   // Mostrar loading si hay menos de 3 productos y no hay filtros (carga inicial)
-  const showInitialLoading = !hasActiveFilters && products.length === 0;
+  const showInitialLoading = !hasActiveFilters && displayedProducts.length === 0;
 
   return (
     <>
@@ -259,6 +324,23 @@ export default function HomeClient({ products, categories = [] }) {
                     <ProductCard key={p.id} product={p} />
                   ))}
                 </div>
+                
+                {/* Sentinel para Intersection Observer (solo si no hay filtros activos) */}
+                {!hasActiveFilters && (
+                  <div ref={observerTarget} className="mt-8 flex justify-center">
+                    {isLoadingMore && (
+                      <div className="flex flex-col items-center space-y-2">
+                        <LoadingSpinner size="medium" />
+                        <p className="text-sm text-gray-600">Cargando más productos...</p>
+                      </div>
+                    )}
+                    {!hasMore && displayedProducts.length > 20 && (
+                      <p className="text-sm text-gray-500 py-4">
+                        ✨ Has visto todos los productos disponibles
+                      </p>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <NoProductsFound 
