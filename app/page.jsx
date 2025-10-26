@@ -1,10 +1,10 @@
 import HomeClient from "../components/HomeClient";
-import { supabaseServer } from "../lib/supabase/serverClient";
+import { createServerClient } from "../lib/supabase/supabaseServer";
 import { Suspense } from "react";
 import { og_images } from "../constants/appConstants";
 
 
-export const revalidate = 60; // ISR básico para listado
+export const revalidate = 300; // ISR: Revalidar cada 5 minutos
 
 // Generar metadatos dinámicos para la página principal
 export function generateMetadata() {
@@ -43,31 +43,43 @@ export function generateMetadata() {
 }
 
 export default async function HomePage() {
-  // SSR/ISR simple: obtener productos (solo datos mínimos)
-  const supabase = supabaseServer();
-  const { data: products, error } = await supabase
-    .from("products")
-    .select("id, name, description, price, currency, image_url, discount_percentage, original_price, stock, category_id, is_on_sale, is_new_in_box, is_featured");
+  // Usar consulta directa con createServerClient (funciona en dev y prod)
+  try {
+    const supabase = createServerClient();
+    
+    const [productsResult, categoriesResult] = await Promise.all([
+      supabase
+        .from('products')
+        .select('id, name, price, currency, image_url, discount_percentage, original_price, stock, category_id, is_on_sale, is_new_in_box, is_featured')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('categories')
+        .select('id, name, icon')
+        .order('name', { ascending: true })
+    ]);
+    
+    const products = productsResult.data || [];
+    const categories = categoriesResult.data || [];
 
-  const { data: categories = [] } = await supabase
-    .from("categories")
-    .select("id, name, icon")
-    .order("name", { ascending: true });
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <main>
-        {error ? (
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main>
+          <Suspense fallback={<div className="container-page py-6 text-gray-600">Cargando…</div>}>
+            <HomeClient products={products} categories={categories} />
+          </Suspense>
+        </main>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error loading page:', error);
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main>
           <div className="container-page">
             <p className="text-red-600">Error cargando productos</p>
           </div>
-        ) : (
-          <Suspense fallback={<div className="container-page py-6 text-gray-600">Cargando…</div>}>
-            <HomeClient products={products || []} categories={categories || []} />
-            
-          </Suspense>
-        )}
-      </main>
-    </div>
-  );
+        </main>
+      </div>
+    );
+  }
 }

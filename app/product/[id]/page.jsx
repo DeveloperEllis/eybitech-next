@@ -7,8 +7,8 @@ import ImageCarousel from "../../../components/ImageCarousel";
 import ProductInfoClient from "../../../components/ProductInfoClient";
 import SimilarProducts from "../../../components/SimilarProducts";
 
-export const dynamic = "force-dynamic"; // SSR siempre; luego podemos evaluar ISR
-export const revalidate = 0;
+export const dynamic = "force-static"; // Generar estáticamente cuando sea posible
+export const revalidate = 300; // Revalidar cada 5 minutos (ISR)
 
 // Helper para crear URL válida
 function createValidURL(url) {
@@ -36,13 +36,11 @@ function createValidURL(url) {
 export async function generateMetadata({ params }) {
     const { id } = params;
     const supabase = supabaseServer();
+    
+    // Optimizado: solo seleccionar campos necesarios para metadata
     const { data: product } = await supabase
         .from("products")
-        .select(`
-            id, name, description, price, currency, image_url, original_price, discount_percentage,
-            vendor_id(name),
-            category_id(name)
-        `)
+        .select('id, name, description, price, currency, image_url, original_price, discount_percentage, vendor_id, category_id')
         .eq("id", id)
         .single();
 
@@ -74,17 +72,6 @@ export async function generateMetadata({ params }) {
     const currentPrice = parseFloat(product.price);
     const savings = hasOffer ? originalPrice - currentPrice : 0;
     
-    if (hasOffer) {
-        richDescription = `🔥 ¡OFERTA ESPECIAL! ${product.discount_percentage}% OFF - Ahorra ${savings.toFixed(2)} ${product.currency} | ${richDescription}`;
-    }
-    
-    if (product.vendor_id?.name) {
-        richDescription += ` | Marca: ${product.vendor_id.name}`;
-    }
-    if (product.category_id?.name) {
-        richDescription += ` | Categoría: ${product.category_id.name}`;
-    }
-    
     const finalDescription = richDescription.slice(0, 160);
 
     // Crear título más atractivo para ofertas
@@ -102,8 +89,6 @@ export async function generateMetadata({ params }) {
         description: finalDescription,
         keywords: [
             product.name,
-            product.category_id?.name,
-            product.vendor_id?.name,
             'tecnología',
             'Cuba',
             'Eybitech'
@@ -159,41 +144,42 @@ export default async function ProductPage({ params }) {
     const { id } = params;
     const supabase = supabaseServer();
 
-    const { data: product, error } = await supabase
-        .from("products")
-        .select(`
-      *,
-      vendor_id(name),
-      category_id(id, name, icon)
-    `)
-        .eq("id", id)
-        .single();
+    // Optimizado: consultas paralelas para reducir tiempo de carga
+    const [productResult, imagesResult] = await Promise.all([
+        supabase
+            .from("products")
+            .select('*, vendor_id(name), category_id(id, name, icon)')
+            .eq("id", id)
+            .single(),
+        supabase
+            .from("product_images")
+            .select("image_url")
+            .eq("product_id", id)
+            .order("display_order", { ascending: true })
+    ]);
 
+    const { data: product, error } = productResult;
+    
     // Si no se encuentra el producto, mostrar página 404
     if (!product || error) {
         notFound();
     }
 
-    // Fetch product images (optional table)
-    let productImages = [];
-    const { data: imgs } = await supabase
-        .from("product_images")
-        .select("image_url")
-        .eq("product_id", id)
-        .order("display_order", { ascending: true });
-    productImages = (imgs || []).map((i) => i.image_url).filter(Boolean);
+    // Procesar imágenes
+    const productImages = (imagesResult.data || []).map((i) => i.image_url).filter(Boolean);
 
-    // Fetch similar products (same category, exclude current)
+    // Fetch similar products (same category, exclude current) - solo lo necesario
     let similarProducts = [];
-    let query = supabase
-        .from("products")
-        .select(`*, vendor_id(name)`) // keep lightweight
-        .neq("id", id)
-        .limit(4);
     const categoryId = product?.category_id?.id || product?.category_id;
-    if (categoryId) query = query.eq("category_id", categoryId);
-    const { data: similars } = await query;
-    similarProducts = similars || [];
+    if (categoryId) {
+        const { data: similars } = await supabase
+            .from("products")
+            .select('id, name, price, currency, image_url, is_on_sale, discount_percentage')
+            .eq("category_id", categoryId)
+            .neq("id", id)
+            .limit(4);
+        similarProducts = similars || [];
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
