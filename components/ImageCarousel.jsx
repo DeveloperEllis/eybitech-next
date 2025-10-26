@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function ImageCarousel({ images = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,10 +33,13 @@ export default function ImageCarousel({ images = [] }) {
           className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden cursor-pointer group"
           onClick={() => openModal(currentIndex)}
         >
-          <img
+          <Image
             src={images[currentIndex]}
             alt={`Producto ${currentIndex + 1}`}
-            className="w-full h-full object-contain transition-transform group-hover:scale-105"
+            fill
+            className="object-contain transition-transform group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
           />
           <div className="absolute top-3 right-3 bg-black/60 text-white px-3 py-1.5 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +82,13 @@ export default function ImageCarousel({ images = [] }) {
                 onClick={() => setCurrentIndex(index)}
                 className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${index === currentIndex ? 'border-blue-600 ring-2 ring-blue-200' : 'border-gray-200 hover:border-gray-400'}`}
               >
-                <img src={img} alt={`Miniatura ${index + 1}`} className="w-full h-full object-cover" />
+                <Image 
+                  src={img} 
+                  alt={`Miniatura ${index + 1}`} 
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 25vw, 15vw"
+                />
                 {index === currentIndex && <div className="absolute inset-0 bg-blue-600/10"></div>}
               </button>
             ))}
@@ -104,7 +114,16 @@ export default function ImageCarousel({ images = [] }) {
           )}
 
           <div className="relative max-w-6xl w-full h-full flex items-center justify-center">
-            <img src={images[modalIndex]} alt={`Producto ${modalIndex + 1}`} className="max-w-full max-h-full object-contain" />
+            <div className="relative w-full h-full">
+              <Image 
+                src={images[modalIndex]} 
+                alt={`Producto ${modalIndex + 1}`} 
+                fill
+                className="object-contain"
+                sizes="90vw"
+                quality={95}
+              />
+            </div>
             {images.length > 1 && (
               <>
                 <button onClick={prevModalImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all">
@@ -128,9 +147,15 @@ export default function ImageCarousel({ images = [] }) {
                   <button
                     key={index}
                     onClick={() => setModalIndex(index)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === modalIndex ? 'border-white ring-2 ring-white/50' : 'border-white/30 hover:border-white/60'}`}
+                    className={`flex-shrink-0 relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === modalIndex ? 'border-white ring-2 ring-white/50' : 'border-white/30 hover:border-white/60'}`}
                   >
-                    <img src={img} alt={`Miniatura ${index + 1}`} className="w-full h-full object-cover" />
+                    <Image 
+                      src={img} 
+                      alt={`Miniatura ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="64px"
+                    />
                   </button>
                 ))}
               </div>

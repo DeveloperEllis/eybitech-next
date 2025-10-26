@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useCart } from './cart/CartProvider';
 import { CONTACT_INFO, SHARE_MESSAGES, BUSINESS_INFO, URLS, SOCIAL_SHARE_URLS, NOTIFICATIONS } from '../constants/appConstants';
 import { LoadingSpinner } from './LoadingComponents';
@@ -196,7 +197,15 @@ export default function ProductCard({ product, onAddToCart }) {
               )}
             </>
           )}
-          <img src={product.image_url} alt={product.name} className="w-full h-40 sm:h-44 md:h-48 object-cover hover:scale-105 transition-transform duration-200" />
+          <Image 
+            src={product.image_url} 
+            alt={product.name} 
+            width={400}
+            height={300}
+            className="w-full h-40 sm:h-44 md:h-48 object-cover hover:scale-105 transition-transform duration-200"
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
         </div>
       )}
 

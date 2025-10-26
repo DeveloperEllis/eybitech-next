@@ -51,7 +51,8 @@ export default async function HomePage() {
       supabase
         .from('products')
         .select('id, name, price, currency, image_url, discount_percentage, original_price, stock, category_id, is_on_sale, is_new_in_box, is_featured')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(20), // Solo cargar primeros 20 productos inicialmente
       supabase
         .from('categories')
         .select('id, name, icon')

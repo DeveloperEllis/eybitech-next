@@ -12,10 +12,25 @@ export const revalidate = 300; // Revalidar cada 5 minutos
 export async function GET(request) {
   try {
     const now = Date.now();
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const offset = (page - 1) * limit;
     
-    // Verificar si hay caché válido
+    // Cache key único por página
+    const cacheKey = `${page}-${limit}`;
+    
+    // Verificar si hay caché válido para esta página
     if (productsCache && cacheTimestamp && (now - cacheTimestamp < CACHE_DURATION)) {
-      return NextResponse.json(productsCache, {
+      // Paginar desde el cache
+      const paginatedProducts = productsCache.slice(offset, offset + limit);
+      return NextResponse.json({
+        products: paginatedProducts,
+        page,
+        limit,
+        total: productsCache.length,
+        totalPages: Math.ceil(productsCache.length / limit)
+      }, {
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
@@ -23,7 +38,7 @@ export async function GET(request) {
       });
     }
 
-    // Si no hay caché, consultar Supabase
+    // Si no hay caché, consultar Supabase (obtener todos para cache completo)
     const supabase = createServerClient();
     const { data: products, error } = await supabase
       .from('products')
@@ -35,11 +50,19 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Error fetching products' }, { status: 500 });
     }
 
-    // Actualizar caché
+    // Actualizar caché con todos los productos
     productsCache = products || [];
     cacheTimestamp = now;
 
-    return NextResponse.json(products || [], {
+    // Retornar página solicitada
+    const paginatedProducts = productsCache.slice(offset, offset + limit);
+    return NextResponse.json({
+      products: paginatedProducts,
+      page,
+      limit,
+      total: productsCache.length,
+      totalPages: Math.ceil(productsCache.length / limit)
+    }, {
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
