@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase/browserClient';
+import imageCompression from 'browser-image-compression';
 
 function ProductsManagement() {
   const [products, setProducts] = useState([]);
@@ -292,26 +293,50 @@ function ProductsManagement() {
   const uploadImages = async () => {
     if (imageFiles.length === 0) return [];
     setUploadProgress(0);
+    
     const uploadPromises = imageFiles.map(async (file, index) => {
       try {
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/\s+/g, '-')}`;
+        // Opciones de compresión optimizadas
+        const options = {
+          maxSizeMB: 0.5, // Máximo 500KB por imagen
+          maxWidthOrHeight: 1920, // Máximo 1920px (Full HD)
+          useWebWorker: true,
+          fileType: 'image/jpeg', // Convertir todo a JPEG (mejor compresión)
+          initialQuality: 0.85, // Calidad 85% (excelente balance calidad/tamaño)
+        };
+
+        console.log(`Comprimiendo imagen ${index + 1}/${imageFiles.length}...`);
+        console.log(`Tamaño original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+        
+        // Comprimir la imagen
+        const compressedFile = await imageCompression(file, options);
+        
+        console.log(`Tamaño comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+        console.log(`Reducción: ${(((file.size - compressedFile.size) / file.size) * 100).toFixed(1)}%`);
+        
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/\s+/g, '-').replace(/\.(png|jpg|jpeg|webp)$/i, '.jpg')}`;
+        
         const { data, error } = await supabase.storage
           .from('product-images')
-          .upload(fileName, file);
+          .upload(fileName, compressedFile);
+          
         if (error) {
           console.error(`Error subiendo imagen ${index + 1}:`, error);
           return null;
         }
+        
         const { data: publicData } = supabase.storage
           .from('product-images')
           .getPublicUrl(fileName);
+          
         setUploadProgress(Math.round(((index + 1) / imageFiles.length) * 100));
         return publicData.publicUrl;
       } catch (err) {
-        console.error(`Error en imagen ${index + 1}:`, err);
+        console.error(`Error procesando imagen ${index + 1}:`, err);
         return null;
       }
     });
+    
     const results = await Promise.all(uploadPromises);
     return results.filter(url => url !== null);
   };
@@ -987,13 +1012,25 @@ function ProductsManagement() {
                     </button>
                   )}
                 </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                  <p className="text-xs text-blue-800 font-medium mb-1">🎯 Optimización Automática</p>
+                  <p className="text-xs text-blue-600">
+                    Las imágenes se comprimen automáticamente a máx. 500KB manteniendo excelente calidad. Esto reduce el consumo de almacenamiento y mejora la velocidad de carga.
+                  </p>
+                </div>
                 <p className="text-xs text-gray-500 mb-3">
                   La primera imagen será la que aparezca en las tarjetas del catálogo. Puedes reordenar las imágenes existentes.
                 </p>
                 <input type="file" accept="image/*" multiple onChange={handleImageChange} className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                 {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="mt-2 h-2 bg-gray-200 rounded-full">
-                    <div className="h-2 bg-blue-600 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-gray-600 mb-1">
+                      <span>⚡ Comprimiendo y subiendo imágenes...</span>
+                      <span className="font-semibold">{uploadProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                    </div>
                   </div>
                 )}
                 {(previewUrls.length > 0 || existingImages.length > 0) && (

@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 // Asegúrate de que esta ruta sea correcta para tu cliente
 import { supabase } from '../../lib/supabase/browserClient'; 
-import { FileEdit, Trash2, Plus, X, Upload } from "lucide-react"; 
+import { FileEdit, Trash2, Plus, X, Upload } from "lucide-react";
+import imageCompression from 'browser-image-compression'; 
 
 // Nombre del bucket de Supabase Storage
 const ADS_BUCKET = "ads-images"; 
@@ -55,22 +56,39 @@ function AdsManagement() {
   };
 
   /**
-   * 🛠️ Lógica de subida de imagen a Supabase Storage
+   * 🛠️ Lógica de subida de imagen a Supabase Storage con compresión automática
    * @returns {Object|null} Devuelve { path, url } si es exitoso, o null.
    */
   const uploadImage = async (file) => {
     if (!file) return null;
 
-    // Generar un nombre de archivo único
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-    const filePath = `public/${fileName}`; // Usamos 'public' dentro del bucket
-
     try {
-      // Subir el archivo
+      // Opciones de compresión optimizadas para anuncios
+      const options = {
+        maxSizeMB: 0.8, // Máximo 800KB (anuncios pueden ser un poco más grandes)
+        maxWidthOrHeight: 2048, // Anuncios necesitan mejor resolución
+        useWebWorker: true,
+        fileType: 'image/jpeg',
+        initialQuality: 0.88, // Calidad ligeramente superior para anuncios
+      };
+
+      console.log(`Comprimiendo imagen de anuncio...`);
+      console.log(`Tamaño original: ${(file.size / 1024 / 1024).toFixed(2)} MB`);
+      
+      // Comprimir la imagen
+      const compressedFile = await imageCompression(file, options);
+      
+      console.log(`Tamaño comprimido: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+      console.log(`Reducción: ${(((file.size - compressedFile.size) / file.size) * 100).toFixed(1)}%`);
+
+      // Generar un nombre de archivo único (siempre .jpg)
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.jpg`;
+      const filePath = `public/${fileName}`;
+
+      // Subir el archivo comprimido
       const { data, error } = await supabase.storage
         .from(ADS_BUCKET)
-        .upload(filePath, file);
+        .upload(filePath, compressedFile);
 
       if (error) {
         throw error;
@@ -87,7 +105,7 @@ function AdsManagement() {
       };
 
     } catch (error) {
-      console.error("Error subiendo imagen:", error.message);
+      console.error("Error procesando/subiendo imagen:", error.message);
       alert("❌ Error al subir la imagen. Intenta de nuevo.");
       return null;
     }
