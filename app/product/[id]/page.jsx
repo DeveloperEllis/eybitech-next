@@ -174,7 +174,7 @@ export default async function ProductPage({ params }) {
     if (categoryId) {
         const { data: similars } = await supabase
             .from("products")
-            .select('id, name, price, currency, image_url, is_on_sale, discount_percentage')
+            .select('id, name, price, currency, image_url, is_on_sale, discount_percentage, stock, original_price, is_new_in_box, is_featured, category_id')
             .eq("category_id", categoryId)
             .neq("id", id)
             .limit(4);
