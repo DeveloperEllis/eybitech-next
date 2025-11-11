@@ -76,6 +76,17 @@ export default function ProductInfoClient({ product }) {
     const whatsappUrl = `https://wa.me/${(whats || CONTACT_INFO.WHATSAPP_NUMBER).replace(/[^\d]/g, "")}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+  
+  const handleOrderOutOfStock = () => {
+    const message = `Hola! Me interesa encargar este producto que está agotado:\n\n` +
+                    `📦 *${product.name}*\n` +
+                    `🆔 ID: ${product.id}\n` +
+                    `💰 Precio: ${product.price} ${product.currency}\n\n` +
+                    `¿Cuándo estará disponible?`;
+    const whatsappUrl = `https://wa.me/${(whats || CONTACT_INFO.WHATSAPP_NUMBER).replace(/[^\d]/g, "")}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+  
   const handleAddToCart = () => {
     addToCart(product, 1);
   };
@@ -184,12 +195,33 @@ export default function ProductInfoClient({ product }) {
       )}
 
       <div className="flex space-x-2 mt-auto">
-        <button onClick={handleAddToCart} disabled={product.stock === 0} className={`flex-1 font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-offset-2 ${product.stock === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500'}`}>
-          <span>{product.stock === 0 ? 'Agotado' : 'Agregar al carrito'}</span>
-        </button>
-        <button onClick={handleWhatsApp} className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-          <span>WhatsApp</span>
-        </button>
+        {product.stock === 0 ? (
+          <button 
+            onClick={handleOrderOutOfStock}
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+            </svg>
+            <span>Encargar producto</span>
+          </button>
+        ) : (
+          <>
+            <button 
+              onClick={handleAddToCart}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <span>Agregar al carrito</span>
+            </button>
+            <button 
+              onClick={handleWhatsApp}
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              <span>WhatsApp</span>
+            </button>
+          </>
+        )}
       </div>
 
       <div className="mt-4">

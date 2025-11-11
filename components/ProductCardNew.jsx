@@ -75,6 +75,17 @@ export default function ProductCard({ product, onAddToCart }) {
     const whatsappUrl = `https://wa.me/${CONTACT_INFO.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+
+  const handleOrderOutOfStock = (e) => {
+    e.stopPropagation();
+    const message = `Hola! Me interesa encargar este producto que está agotado:\n\n` +
+                    `📦 *${product.name}*\n` +
+                    `🆔 ID: ${product.id}\n` +
+                    `💰 Precio: ${product.price} ${product.currency}\n\n` +
+                    `¿Cuándo estará disponible?`;
+    const whatsappUrl = `https://wa.me/${CONTACT_INFO.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
   const handleNavigate = () => {
     setIsNavigating(true);
     
@@ -230,33 +241,42 @@ export default function ProductCard({ product, onAddToCart }) {
           <div className="text-xs text-green-700 mt-1">Ahorra {savings.toFixed(2)} {product.currency}</div>
         )}
         <div className="mt-auto pt-3">
-          {outOfStock ? (
-            <div className="w-full h-10 flex items-center justify-center bg-red-100 text-red-700 font-semibold rounded-lg">Agotado</div>
-          ) : (
-            <div className="flex gap-2">
+          <div className="flex gap-2">
+            {outOfStock ? (
               <button
-            className={`flex-1 btn-primary h-10 flex items-center justify-center gap-2 ${outOfStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={outOfStock}
-            onClick={(e) => { e.stopPropagation(); if (outOfStock) return; (onAddToCart ? onAddToCart(product) : addToCart(product, 1)); }}
-            title={outOfStock ? 'Agotado' : 'Añadir al carrito'}
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-            </svg>
-            
-          </button>
-              <button
-            className={`flex-1 h-10 flex items-center justify-center ${outOfStock ? 'opacity-50 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'} text-white rounded-lg px-3 transition-colors`}
-            disabled={outOfStock}
-            onClick={(e) => { e.stopPropagation(); if (outOfStock) return; handleWhatsApp(); }}
-            title={outOfStock ? 'Agotado' : 'Consultar por WhatsApp'}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="w-5 h-5 fill-current">
-              <path d="M380.9 97.1C339 55.1 283.2 32 224.9 32c-116.1 0-210 93.9-210 210 0 37 9.7 73.1 28.1 105L0 480l137.9-42.7c30.8 16.8 65.6 25.6 101.1 25.6h.1c116.1 0 210-93.9 210-210 .1-58.3-22.9-114.1-64.2-156.8zM224.9 438.7h-.1c-32.2 0-63.7-8.6-91.2-24.9l-6.5-3.9-81.8 25.3 26.1-79.7-4.1-6.6c-17.4-28.1-26.6-60.6-26.6-93.8 0-97.4 79.2-176.6 176.6-176.6 47.1 0 91.3 18.3 124.6 51.6 33.3 33.4 51.6 77.6 51.5 124.7 0 97.4-79.2 176.6-176.5 176.6zm97.2-131.8c-5.3-2.6-31.4-15.4-36.2-17.2-4.8-1.7-8.3-2.6-11.8 2.6-3.5 5.3-13.6 17.2-16.7 20.7-3.1 3.5-6.2 4-11.5 1.3-31.2-15.6-51.5-27.9-72.2-63.1-5.5-9.5 5.5-8.8 15.6-29.2 1.7-3.5.9-6.6-.4-9.2-1.3-2.6-11.8-28.5-16.2-39-4.3-10.3-8.7-8.9-11.8-9.1-3-.2-6.6-.2-10.1-.2-3.5 0-9.2 1.3-14 6.6-4.8 5.3-18.4 18-18.4 43.9 0 25.9 18.9 51 21.6 54.6 2.6 3.5 37.2 56.7 90.1 79.4 33.5 14.4 46.6 15.6 63.3 13.1 10.2-1.5 31.4-12.8 35.8-25.2 4.4-12.4 4.4-23 3.1-25.3-1.3-2.3-4.9-3.7-10.2-6.3z"/>
-            </svg>
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-10 flex items-center justify-center gap-2 rounded-lg transition-colors font-semibold"
+                onClick={handleOrderOutOfStock}
+                title="Encargar producto agotado"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                Encargar
               </button>
-            </div>
-          )}
+            ) : (
+              <>
+                <button
+                  className="flex-1 btn-primary h-10 flex items-center justify-center gap-2"
+                  onClick={(e) => { e.stopPropagation(); (onAddToCart ? onAddToCart(product) : addToCart(product, 1)); }}
+                  title="Añadir al carrito"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                  </svg>
+                </button>
+                <button
+                  className="flex-1 h-10 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-lg px-3 transition-colors"
+                  onClick={(e) => { e.stopPropagation(); handleWhatsApp(); }}
+                  title="Consultar por WhatsApp"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" className="w-5 h-5 fill-current">
+                    <path d="M380.9 97.1C339 55.1 283.2 32 224.9 32c-116.1 0-210 93.9-210 210 0 37 9.7 73.1 28.1 105L0 480l137.9-42.7c30.8 16.8 65.6 25.6 101.1 25.6h.1c116.1 0 210-93.9 210-210 .1-58.3-22.9-114.1-64.2-156.8zM224.9 438.7h-.1c-32.2 0-63.7-8.6-91.2-24.9l-6.5-3.9-81.8 25.3 26.1-79.7-4.1-6.6c-17.4-28.1-26.6-60.6-26.6-93.8 0-97.4 79.2-176.6 176.6-176.6 47.1 0 91.3 18.3 124.6 51.6 33.3 33.4 51.6 77.6 51.5 124.7 0 97.4-79.2 176.6-176.5 176.6zm97.2-131.8c-5.3-2.6-31.4-15.4-36.2-17.2-4.8-1.7-8.3-2.6-11.8 2.6-3.5 5.3-13.6 17.2-16.7 20.7-3.1 3.5-6.2 4-11.5 1.3-31.2-15.6-51.5-27.9-72.2-63.1-5.5-9.5 5.5-8.8 15.6-29.2 1.7-3.5.9-6.6-.4-9.2-1.3-2.6-11.8-28.5-16.2-39-4.3-10.3-8.7-8.9-11.8-9.1-3-.2-6.6-.2-10.1-.2-3.5 0-9.2 1.3-14 6.6-4.8 5.3-18.4 18-18.4 43.9 0 25.9 18.9 51 21.6 54.6 2.6 3.5 37.2 56.7 90.1 79.4 33.5 14.4 46.6 15.6 63.3 13.1 10.2-1.5 31.4-12.8 35.8-25.2 4.4-12.4 4.4-23 3.1-25.3-1.3-2.3-4.9-3.7-10.2-6.3z"/>
+                  </svg>
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
