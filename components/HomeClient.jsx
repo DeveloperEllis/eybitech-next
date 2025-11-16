@@ -189,6 +189,9 @@ export default function HomeClient({ products: initialProducts, categories = [] 
   const searchTerm = (searchParams.get('search') || '').toLowerCase();
   const category = searchParams.get('category') || 'all';
   const flagFilter = (searchParams.get('filter') || 'all').toLowerCase();
+  
+  // Detectar si hay filtros activos
+  const hasActiveFilters = searchTerm || category !== 'all' || flagFilter !== 'all';
 
   // Cargar más productos desde la API
   const loadMoreProducts = useCallback(async () => {
@@ -247,7 +250,32 @@ export default function HomeClient({ products: initialProducts, categories = [] 
     setHasMore(initialProducts.length >= 20);
   }, [initialProducts]);
 
-  // Filtrado de productos (ahora usa displayedProducts)
+  // Cargar todos los productos cuando hay filtros activos
+  useEffect(() => {
+    const loadAllProductsForFiltering = async () => {
+      if (!hasActiveFilters) return;
+      
+      setIsFiltering(true);
+      try {
+        // Cargar TODOS los productos de la API
+        const response = await fetch(`/api/products?page=1&limit=1000`);
+        const data = await response.json();
+        
+        if (data.products) {
+          setAllProducts(data.products);
+          setDisplayedProducts(data.products);
+        }
+      } catch (error) {
+        console.error('Error loading all products for filtering:', error);
+      } finally {
+        setIsFiltering(false);
+      }
+    };
+
+    loadAllProductsForFiltering();
+  }, [hasActiveFilters]);
+
+  // Filtrado de productos (ahora usa displayedProducts que contiene TODOS los productos cuando hay filtros)
   const textFiltered = !searchTerm
     ? displayedProducts
     : displayedProducts.filter(p =>
@@ -268,11 +296,13 @@ export default function HomeClient({ products: initialProducts, categories = [] 
 
   // Función para limpiar todos los filtros
   const clearAllFilters = () => {
+    // Resetear a productos iniciales
+    setAllProducts(initialProducts);
+    setDisplayedProducts(initialProducts);
+    setPage(1);
+    setHasMore(initialProducts.length >= 20);
     router.push(pathname);
   };
-
-  // Detectar si hay filtros activos
-  const hasActiveFilters = searchTerm || category !== 'all' || flagFilter !== 'all';
 
   // Mostrar loading si hay menos de 3 productos y no hay filtros (carga inicial)
   const showInitialLoading = !hasActiveFilters && displayedProducts.length === 0;
