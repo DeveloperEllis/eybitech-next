@@ -6,6 +6,7 @@ import FooterBar from "../../../components/FooterBar";
 import ImageCarousel from "../../../components/ImageCarousel";
 import ProductInfoClient from "../../../components/ProductInfoClient";
 import SimilarProducts from "../../../components/SimilarProducts";
+import ViewTracker from "../../../components/ViewTracker";
 
 export const dynamic = "force-static"; // Generar estáticamente cuando sea posible
 export const revalidate = 300; // Revalidar cada 5 minutos (ISR)
@@ -157,6 +158,8 @@ export default async function ProductPage({ params }) {
             .eq("product_id", id)
             .order("display_order", { ascending: true })
     ]);
+    
+    // Nota: views_count está incluido en el SELECT * arriba
 
     const { data: product, error } = productResult;
     
@@ -198,6 +201,8 @@ export default async function ProductPage({ params }) {
                 )}
                 {product && (
                     <>
+                        {/* Componente invisible que rastrea la vista */}
+                        <ViewTracker productId={product.id} />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
