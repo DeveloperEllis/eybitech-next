@@ -8,14 +8,30 @@ export const revalidate = 60; // ISR: Revalidar cada 1 minuto (más agresivo par
 
 // Generar metadatos dinámicos para la página principal
 export function generateMetadata() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.eybitech.com';
   return {
-    title: "Inicio",
-    description: "Descubre los mejores productos tecnológicos en Cuba. Smartphones, laptops, tablets, smartwatches y accesorios de calidad en Eybitech.",
-    keywords: ['tecnología', 'electrónicos', 'smartphones', 'laptops', 'Cuba', 'Trinidad', 'tienda online', 'ofertas'],
+    title: "Inicio - Tienda de Tecnología en Cuba",
+    description: "🛒 Compra tecnología en Cuba con Eybitech. ✅ Smartphones, laptops, tablets y accesorios. 🚚 Envío a toda Cuba. 💰 Mejores precios. ⭐ Productos originales y garantizados.",
+    keywords: [
+      'tecnología Cuba',
+      'comprar celulares Cuba',
+      'laptops Cuba',
+      'tienda online Cuba',
+      'smartphones Trinidad',
+      'electrónicos Sancti Spíritus',
+      'tablets Cuba',
+      'smartwatches Cuba',
+      'accesorios tecnológicos',
+      'ofertas tecnología',
+      'envío Cuba',
+      'productos Apple Cuba',
+      'Samsung Cuba',
+      'Xiaomi Cuba'
+    ],
     openGraph: {
-      title: "Eybitech - Los mejores productos tecnológicos en Cuba",
-      description: "Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad. Precios competitivos y envíos a toda Cuba.",
-      url: process.env.NEXT_PUBLIC_APP_URL,
+      title: "Eybitech - La mejor tienda de tecnología en Cuba 🇨🇺",
+      description: "Compra smartphones, laptops, tablets y más. Envío a toda Cuba. Precios competitivos. Productos originales con garantía.",
+      url: baseUrl,
       siteName: "Eybitech",
       type: "website",
       locale: "es_CU",
@@ -24,21 +40,25 @@ export function generateMetadata() {
           url: og_images.default,
           width: 1200,
           height: 630,
-          alt: "Eybitech - Tienda de tecnología en Cuba",
+          alt: "Eybitech - Tienda de tecnología en Cuba con smartphones, laptops y accesorios",
           type: "image/png",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Eybitech - Los mejores productos tecnológicos en Cuba",
-      description: "Descubre smartphones, laptops, tablets, smartwatches y accesorios de calidad.",
+      title: "Eybitech - Tecnología en Cuba 🇨🇺",
+      description: "Smartphones, laptops, tablets y más. Envío a toda Cuba. Precios competitivos.",
       images: og_images.default,
       creator: "@eybitech",
       site: "@eybitech",
     },
-    // Proporcionar explícitamente og:image
-    "og:image": og_images.default,
+    alternates: {
+      canonical: baseUrl,
+    },
+    other: {
+      'og:image': og_images.default,
+    },
   };
 }
 
