@@ -10,8 +10,14 @@ Para que el contador de vistas funcione correctamente, debes ejecutar el siguien
 2. Ve a **SQL Editor** en el menú lateral
 3. Haz clic en **New Query**
 
-### Paso 2: Ejecutar el SQL
+### Paso 2: Ejecutar los Scripts SQL
 
+Hay dos archivos SQL que debes ejecutar en orden:
+
+#### 2.1 Primero: Configurar RLS (Seguridad)
+Copia y pega el contenido de `supabase/rls_views_policy.sql` - Este configura las políticas de seguridad.
+
+#### 2.2 Segundo: Función de incremento (si no lo hiciste antes)
 Copia y pega el contenido del archivo `supabase/increment_views.sql` en el editor y ejecuta:
 
 ```sql
@@ -65,10 +71,46 @@ Una vez ejecutado, puedes verificar que funciona visitando cualquier producto en
 - ✅ Compatible con ISR (Incremental Static Regeneration)
 - ✅ No afecta el rendimiento de la página
 
+## Seguridad (RLS)
+
+### ¿Por qué usar SECURITY DEFINER?
+
+La función `increment_product_views` usa `SECURITY DEFINER`, lo que significa que se ejecuta con los privilegios del owner de la base de datos, **no** del usuario que la llama. Esto permite:
+
+- ✅ Usuarios anónimos pueden incrementar vistas (sin login)
+- ✅ **Solo** pueden modificar la columna `views_count`
+- ✅ **No** pueden modificar otras columnas (nombre, precio, stock, etc.)
+- ✅ **No** pueden crear, eliminar o actualizar productos de otras formas
+- ✅ Protección completa contra inyecciones SQL
+
+### Políticas RLS Configuradas
+
+1. **SELECT (lectura)**: Público - todos pueden ver productos
+2. **INSERT (crear)**: Solo admins autenticados
+3. **UPDATE (actualizar)**: Solo admins autenticados (excepto `views_count` via función)
+4. **DELETE (eliminar)**: Solo admins autenticados
+
 ## Troubleshooting
 
 Si las vistas no se actualizan:
-1. Verifica que el SQL se ejecutó correctamente en Supabase
-2. Abre la consola del navegador y busca errores
-3. Verifica que la columna `views_count` existe en la tabla `products`
-4. Asegúrate de que las políticas RLS permiten la actualización (usa SECURITY DEFINER)
+1. ✅ Verifica que **ambos** archivos SQL se ejecutaron correctamente
+2. ✅ Abre la consola del navegador (F12) y busca errores en Network
+3. ✅ Verifica que la columna `views_count` existe: 
+   ```sql
+   SELECT column_name FROM information_schema.columns 
+   WHERE table_name = 'products' AND column_name = 'views_count';
+   ```
+4. ✅ Verifica que la función existe:
+   ```sql
+   SELECT routine_name FROM information_schema.routines 
+   WHERE routine_name = 'increment_product_views';
+   ```
+5. ✅ Verifica los permisos de la función:
+   ```sql
+   SELECT * FROM information_schema.routine_privileges 
+   WHERE routine_name = 'increment_product_views';
+   ```
+6. ✅ Prueba manualmente en SQL Editor:
+   ```sql
+   SELECT increment_product_views('id-del-producto-aqui');
+   ```
