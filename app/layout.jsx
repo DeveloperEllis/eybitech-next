@@ -3,6 +3,7 @@ import { CartProvider } from '../components/cart/CartProvider';
 import SiteChrome from '../components/SiteChrome';
 import { getStoreSettings } from '../lib/settings/getStoreSettings';
 import StructuredData from '../components/StructuredData';
+import Script from 'next/script';
 
 // Helper para crear URL válida
 function createValidURL(url) {
@@ -83,6 +84,20 @@ export default async function RootLayout({ children }) {
         <meta name="ICBM" content="21.8022, -79.9833" />
       </head>
       <body className="min-h-screen bg-gray-50 text-gray-900">
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-PYLB2KCS12"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-PYLB2KCS12');
+          `}
+        </Script>
+        
         <StructuredData type="Organization" data={settings} />
         <StructuredData type="WebSite" />
         <CartProvider>
