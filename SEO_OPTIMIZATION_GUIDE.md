@@ -124,7 +124,7 @@
    - Impresiones totales
    - CTR (Click-through rate)
    - Posición promedio
-   - Páginas indexadas
+   - Páginas indexadas  
 
 2. **En Google Analytics:**
    - Usuarios orgánicos

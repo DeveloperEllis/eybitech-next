@@ -37,6 +37,7 @@ export default function Navbar({ cartCount: cartCountProp = 0, initialSettings }
         {/* Desktop nav */}
         <div className="hidden md:flex space-x-8">
           <Link href="/" className={`${linkClasses} ${activeLinkClasses}`}>Inicio</Link>
+          <Link href="/ofertas" className={`${linkClasses} ${activeLinkClasses} text-orange-400 hover:text-orange-300`}>🔥 Ofertas</Link>
           <Link href="/servicios" className={`${linkClasses} ${activeLinkClasses}`}>Servicios</Link>
           <Link href="/calculadora" className={`${linkClasses} ${activeLinkClasses}`}>Calculadora</Link>
           <Link href="/blog" className={`${linkClasses} ${activeLinkClasses}`}>Blog & Tutoriales</Link>
@@ -69,8 +70,9 @@ export default function Navbar({ cartCount: cartCountProp = 0, initialSettings }
                 </svg>
               </button>
             </div>
-            <div className="flex flex-col p-4 space-y-4">
+            <div className="flex flex-col space-y-2">
               <Link href="/" onClick={closeDrawer} className={`${linkClasses} py-3 px-4 rounded-lg hover:bg-gray-800`}>Inicio</Link>
+              <Link href="/ofertas" onClick={closeDrawer} className={`${linkClasses} py-3 px-4 rounded-lg hover:bg-gray-800 text-orange-400`}>🔥 Ofertas Especiales</Link>
               <Link href="/calculadora" onClick={closeDrawer} className={`${linkClasses} py-3 px-4 rounded-lg hover:bg-gray-800`}>Calculadora</Link>
               <Link href="/servicios" onClick={closeDrawer} className={`${linkClasses} py-3 px-4 rounded-lg hover:bg-gray-800`}>Servicios</Link>
               <Link href="/blog" onClick={closeDrawer} className={`${linkClasses} py-3 px-4 rounded-lg hover:bg-gray-800`}>Blog & Tutoriales</Link>
