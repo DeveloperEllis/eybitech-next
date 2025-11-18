@@ -1,20 +1,24 @@
+// Helper para asegurar que la URL tenga protocolo
+function ensureHttps(url) {
+  if (!url) return 'https://www.eybitech.com';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+}
+
 export default function robots() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.eybitech.com'
+  const baseUrl = ensureHttps(process.env.NEXT_PUBLIC_APP_URL)
   
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/admin', '/cart/'],
-      },
-      {
-        userAgent: 'Googlebot',
-        allow: '/',
         disallow: ['/admin/', '/api/', '/cart/'],
-        crawlDelay: 0,
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
   }
 }
