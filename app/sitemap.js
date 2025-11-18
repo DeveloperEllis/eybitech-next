@@ -2,8 +2,17 @@ import { createServerClient } from '../lib/supabase/supabaseServer'
 
 export const revalidate = 3600 // Revalidar cada hora
 
+// Helper para asegurar que la URL tenga protocolo
+function ensureHttps(url) {
+  if (!url) return 'https://www.eybitech.com';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+}
+
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.eybitech.com'
+  const baseUrl = ensureHttps(process.env.NEXT_PUBLIC_APP_URL)
   const supabase = createServerClient()
 
   // Obtener todos los productos
